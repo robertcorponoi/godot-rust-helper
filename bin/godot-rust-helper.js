@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 const fs = require('fs-extra');
-const { join } = require('path');
-const program = require('commander');
-const { promisify } = require('util');
-const pkg = require('../package.json');
-const exec = require('child_process').exec;
 const shelljs = require('shelljs');
+const program = require('commander');
+const pkg = require('../package.json');
+
+const { join: pathJoin, resolve: pathResolve } = require('path');
 
 const findNearestCargoToml = require('../src/find');
 const { libFile, createGdnlibFile } = require('../src/content');
@@ -23,14 +22,15 @@ const validTargets = ['windows', 'linux', 'osx'];
 program.version(pkg.version);
 
 /**
- * Add the `new` command.
+ * Adds the `new` command.
  * 
- * The `new` command is used to create a new environment used to hold your Rust modules. Each Godot project should have its own
- * environment since the environment manages the Godot project's modules and dependencies.
+ * The `new` command is used to create an environment for your Rust modules. The environment is created as a directory in the specified destination.
+ * 
+ * Each Godot project should have a new environment created for it since each game will have its own modules.
  */
 program
   .command('new <destination> <godotProjectDir> [targets]')
-  .description('Creates a new environment for managing your Rust modules. Each Godot project should have its own environment since the environment manages the Godot project\'s modules and dependencies.')
+  .description('Creates a new environment for managing your Rust modules. Each Godot project should have a new environment created for it since each game will have its own modules.')
   .action((destination, godotProjectDir, targets) => {
     /**
      * First, we check to see if the destination directory for the environment exists.
@@ -48,7 +48,7 @@ program
      * 
      * If there is no godot.project file, then we let the user know and stop the script.
      */
-    if (!fs.pathExistsSync(join(godotProjectDir, 'project.godot'))) {
+    if (!fs.pathExistsSync(pathJoin(godotProjectDir, 'project.godot'))) {
       console.log('The godot project dir provided is not valid.');
       return;
     }
@@ -59,7 +59,7 @@ program
      * Also create the 'rust-modules' directory in the Godot project so that we don't clutter the root directory.
      */
     fs.mkdirpSync(destination);
-    fs.mkdirpSync(join(godotProjectDir, 'rust-modules'));
+    fs.mkdirpSync(pathJoin(godotProjectDir, 'rust-modules'));
 
     /**
      * Check to see if the provided targets are valid.
@@ -83,14 +83,16 @@ program
     /**
      * Create the config file that contains the path to the Godot project and the targets that should be set.
      */
-    const config = { godotProjectDir, targets, modules: [] };
-    fs.outputJsonSync(join(destination, 'godot-rust-helper.json'), config);
+    const config = { godotProjectDir: pathResolve(godotProjectDir), targets, modules: [] };
+    fs.outputJsonSync(pathJoin(destination, 'godot-rust-helper.json'), config);
   });
 
 /**
  * Add the `create` command.
  * 
  * The `create` command is used inside of an environment created with `new` and is used to initialize a new Rust module.
+ * 
+ * The name provided to this command will be used to create the name for the Rust package so name it accordingly.
  */
 program
   .command('create <name>')
@@ -123,15 +125,16 @@ program
      * We do this by running `cargo new --lib` to create a new cargo project.
      */
     try {
-      await exec(`cargo new ${name} --lib`);
+      await shelljs.exec(`cargo new ${name} --lib`);
     } catch (err) {
+      console.log(err);
       console.log('Could not create Rust module, try running the command again.');
       return;
     }
 
     /**
-     * Check if the Cargo.toml file has everything we need and if not then we have to add it.
-     */
+    * Check if the Cargo.toml file has everything we need and if not then we have to add it.
+    */
     const moduleToml = fs.readFileSync(`${name}/Cargo.toml`, { encoding: 'utf-8' }).split('\n');
 
     if (!moduleToml.includes('[lib]')) {
@@ -182,6 +185,11 @@ program
     const moduleDir = findNearestCargoToml(process.cwd());
 
     /**
+     * Get the config so that we can check the targets later.
+     */
+    const config = fs.readJsonSync(pathResolve(moduleDir, '..', 'godot-rust-helper.json'));
+
+    /**
      * Then we have to run Cargo build to create the build files.
      */
     try {
@@ -192,10 +200,34 @@ program
     }
 
     /**
-     * Get the name of the module from the Cargo.toml file.
+     * Get the name of the module from the base path to it.
      */
-    const moduleToml = fs.readFileSync(`Cargo.toml`, { encoding: 'utf-8' }).split('\n');
-    console.log(moduleToml);
+    const name = moduleDir.split('\\').pop();
+
+    /**
+     * Get the base path to the build files.
+     */
+    const base = pathJoin(moduleDir, 'target', 'debug');
+
+    /**
+     * Go through the targets specified in the config file and copy the build files to the Godot project dir.
+     */
+    config.targets.map(target => {
+      const normalized = {
+        linux: 'so',
+        osx: 'dylib',
+        windows: 'dll'
+      };
+
+      const file = pathJoin(base, `${name}.${normalized[target]}`);
+
+      shelljs.cp(file, pathJoin(config.godotProjectDir, 'rust-modules'));
+    });
+
+    /**
+     * Let the user know that the build is finished.
+     */
+    console.info('Build complete!');
   });
 
 program.parse(process.argv);

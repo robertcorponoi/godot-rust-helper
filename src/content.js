@@ -18,7 +18,7 @@ impl HelloWorld {
 
   #[export]
   fn _ready(&self, _owner: gdnative::Node) {
-    godot_print!("hello, samurai man.")
+    godot_print!("hello, world.")
   }
 }
 
@@ -62,7 +62,7 @@ function createGdnlibFile(name, targets) {
   targets.map(target => {
     switch (target) {
       case 'windows':
-        gdnlibArr.splice(entryInsertPoint, 0, `Windows.64="res://rust-modules/${name}/${name}.dll`);
+        gdnlibArr.splice(entryInsertPoint, 0, `Windows.64="res://rust-modules/${name}/${name}.dll"`);
         gdnlibArr.splice(depInsertPoint, 0, `Windows.64=[  ]`);
         break;
       case 'linux':

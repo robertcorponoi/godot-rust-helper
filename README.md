@@ -6,6 +6,18 @@
 
 <p align="center">A shell script that helps you create and update Rust modules for Godot.<p>
 
+<div align="center">
+
+  [![NPM version](https://img.shields.io/npm/v/godot-rust-helper.svg?style=flat)](https://www.npmjs.com/package/godot-rust-helper)
+  [![Known Vulnerabilities](https://snyk.io/test/github/robertcorponoi/godot-rust-helper/badge.svg)](https://snyk.io/test/github/robertcorponoi/godot-rust-helper)
+  ![npm](https://img.shields.io/npm/dt/godot-rust-helper)
+  [![NPM downloads](https://img.shields.io/npm/dm/godot-rust-helper.svg?style=flat)](https://www.npmjs.com/package/godot-rust-helper)
+  <a href="https://badge.fury.io/js/godot-rust-helper"><img src="https://img.shields.io/github/issues/robertcorponoi/godot-rust-helper.svg" alt="issues" height="18"></a>
+  <a href="https://badge.fury.io/js/godot-rust-helper"><img src="https://img.shields.io/github/license/robertcorponoi/godot-rust-helper.svg" alt="license" height="18"></a>
+  [![Gitter](https://badges.gitter.im/gitterHQ/gitter.svg)](https://gitter.im/robertcorponoi)
+
+</div>
+
 ## **Why**
 
 Using Rust modules with Godot is super performant and fun but it can sometimes be intimidating or frustrating to set up and maintain. Godot rust helper aims to help you get rid of some of this frustration by managing your modules and updating their references in the Godot project. Note that this covers about 80% of use cases and if you have a different use case then I would be more than happy to add functionality to accomodate for it.

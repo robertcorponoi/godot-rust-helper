@@ -1,6 +1,6 @@
 [entry]
 
-Windows.64="res://rust-modules/hello.dll
+Windows.64="res://rust-modules/world/world.dll
 
 [dependencies]
 

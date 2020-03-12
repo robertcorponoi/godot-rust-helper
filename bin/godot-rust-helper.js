@@ -161,13 +161,63 @@ program
     const config = fs.readJsonSync('godot-rust-helper.json');
     config.modules.push(name);
 
+    /**
+     * Create the folder for the module in the Godot project directory.
+     */
+    fs.ensureDirSync(`${config.godotProjectDir}/rust-modules/${name}`);
+
     const gdnlib = createGdnlibFile(name, config.targets);
-    fs.writeFileSync(`${config.godotProjectDir}/rust-modules/${name}.gdnlib`, gdnlib);
+    fs.writeFileSync(`${config.godotProjectDir}/rust-modules/${name}/${name}.gdnlib`, gdnlib);
 
     /**
      * Lastly write to the config file to save the module created.
      */
     fs.outputJsonSync('godot-rust-helper.json', config);
+  });
+
+/**
+ * Add the `destroy` command.
+ * 
+ * The `destroy` command is used inside of an environment created with `new` and is used to remove a Rust module created with `create`.
+ * 
+ * This is the recommended way to remove Rust modules as it gets rid of any traces from the environment and the Godot project.
+ */
+program
+  .command('destroy <name>')
+  .description('Removes all traces of a created Rust module')
+  .action(name => {
+    const config = fs.readJsonSync('godot-rust-helper.json');
+
+    /**
+     * First, we have to make sure that we are in an environment created by `new`. This is done by checking to see if there is a 
+     * godot-rust-helper.json configuration file present.
+     * 
+     * If we are not in an environment, we let the user know and stop the script.
+     */
+    if (!fs.pathExistsSync('godot-rust-helper.json')) {
+      console.log('This command can only be used inside of an envrionment created with the new command');
+      return;
+    }
+
+    /**
+     * Next, we have to check if the module to delete actually exists.
+     * 
+     * If it does not, then we let the user know and stop the script.
+     */
+    if (!fs.pathExistsSync(name)) {
+      console.log('The module to delete does not exist');
+      return;
+    }
+
+    /**
+     * Everything's good so we remove the module from the config, from the environment, and from the Godot project.
+     */
+    config.modules = config.modules.filter(module => module !== name);
+    fs.outputJsonSync('godot-rust-helper.json', config);
+
+    fs.removeSync(name);
+
+    fs.removeSync(`${config.godotProjectDir}/rust-modules/${name}`);
   });
 
 /**
@@ -221,7 +271,7 @@ program
 
       const file = pathJoin(base, `${name}.${normalized[target]}`);
 
-      shelljs.cp(file, pathJoin(config.godotProjectDir, 'rust-modules'));
+      shelljs.cp(file, pathJoin(config.godotProjectDir, 'rust-modules', name));
     });
 
     /**

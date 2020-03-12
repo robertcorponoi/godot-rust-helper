@@ -76,6 +76,8 @@ What this does is run `cargo new <name> --lib` and adds the necessary tags and d
 
 This also creates a directory in the "rust-modules" directory in your Godot project for the module which will contain the .gdnlib file and the build files.
 
+**Note:** This command has to be run from the environment directory.
+
 ### **Removing Modules**
 
 You can also remove all traces of modules from the environment and the Godot project by using the `destroy` command. This is the recommended way to remove modules.
@@ -88,6 +90,8 @@ $ godot-rust-helper destroy <name>
 
 where `name` is the name used when creating the module.
 
+**Note:** This command has to be run from the environment directory.
+
 ## **Step 3: Building Modules**
 
 After you have created your module (or you can do this with the default contents to try it out) you're ready to build your script using:
@@ -97,6 +101,8 @@ $ godot-rust-helper build
 ```
 
 What this does is first run `cargo build` and then it moves the build files into the Godot project directory.
+
+**Note:** This command has to be run from the module directory.
 
 **Note:** The first time you run this it will take a while as it have to reach out and download the necessary dependencies, every build after that will be much quicker.
 

@@ -50,7 +50,7 @@ describe('Creating a new environment', () => {
     const config = fs.readJsonSync(configFilePath);
 
     const expected = {
-      godotProjectDir: 'C:\\Users\\Bob\\Documents\\Projects\\godot-rust-helper-node\\test\\godot-test-project',
+      godotProjectDir: 'C:\\Users\\Bob\\Documents\\Projects\\godot-rust-helper\\test\\godot-test-project',
       targets: ['windows'],
       modules: []
     };
@@ -64,7 +64,7 @@ describe('Creating a new environment', () => {
     const config = fs.readJsonSync(configFilePath);
 
     const expected = {
-      godotProjectDir: 'C:\\Users\\Bob\\Documents\\Projects\\godot-rust-helper-node\\test\\godot-test-project',
+      godotProjectDir: 'C:\\Users\\Bob\\Documents\\Projects\\godot-rust-helper\\test\\godot-test-project',
       targets: ['windows', 'linux', 'osx'],
       modules: []
     };
@@ -145,7 +145,7 @@ describe('Creating modules', () => {
     chai.expect(config.modules).to.deep.equal(['hello', 'world']);
     chai.expect(gdnlibFileExists1).to.be.true;
     chai.expect(gdnlibFileExists2).to.be.true;
-  }).timeout(5000);
+  }).timeout(50000);
 });
 
 describe('Removing modules', () => {

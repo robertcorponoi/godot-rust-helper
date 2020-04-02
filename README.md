@@ -106,6 +106,12 @@ What this does is first run `cargo build` and then it moves the build files into
 
 **Note:** The first time you run this it will take a while as it have to reach out and download the necessary dependencies, every build after that will be much quicker.
 
+The build command also supports the `--watch` option which will watch the src directory of your module for changes and re-build it automatically.
+
+```bash
+$ godot-rust-helper build --watch
+```
+
 ## **Final Steps**
 
 There's one step that has to be done by hand and that's heading over to your Godot project, creating the node that your script expects, and adding the script to the node.

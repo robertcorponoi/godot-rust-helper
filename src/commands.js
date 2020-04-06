@@ -255,7 +255,7 @@ module.exports = {
         windows: 'dll'
       };
 
-      const file = pathJoin(base, `lib${name}.${normalized[target]}`);
+      const file = pathJoin(base, `${isWindows ? '' : `lib`}${name}.${normalized[target]}`);
 
       shelljs.cp(file, pathJoin(config.godotProjectDir, 'rust-modules', name));
 

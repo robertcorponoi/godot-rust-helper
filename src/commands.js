@@ -237,7 +237,8 @@ module.exports = {
     /**
      * Get the name of the module from the base path to it.
      */
-    const name = moduleDir.split('\\').pop();
+    const isWindows = process.platform == 'win32'
+    const name = moduleDir.split( isWindows ? '\\' : '/').pop();
 
     /**
      * Get the base path to the build files.
@@ -254,7 +255,7 @@ module.exports = {
         windows: 'dll'
       };
 
-      const file = pathJoin(base, `${name}.${normalized[target]}`);
+      const file = pathJoin(base, `${isWindows ? '' : `lib`}${name}.${normalized[target]}`);
 
       shelljs.cp(file, pathJoin(config.godotProjectDir, 'rust-modules', name));
 

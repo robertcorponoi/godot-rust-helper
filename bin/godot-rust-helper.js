@@ -43,8 +43,18 @@ program
  */
 program
   .command('destroy <name>')
-  .description('Removes all traces of a created Rust module')
+  .description('Removes all traces of a created Rust module.')
   .action(commands.destroy);
+
+/**
+ * Add the `import` command.
+ * 
+ * The `import` command is used to import a Rust module from outside the environment.
+ */
+program
+  .command('import <path>')
+  .description('Imports an existing Rust module into this environment.')
+  .action(commands.import);
 
 /**
  * Add the `build` command.

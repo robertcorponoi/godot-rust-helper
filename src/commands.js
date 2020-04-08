@@ -4,10 +4,10 @@ const fs = require('fs-extra');
 const chalk = require('chalk');
 const shelljs = require('shelljs');
 const chokidar = require('chokidar');
-const { join: pathJoin, resolve: pathResolve } = require('path');
+const { join: pathJoin, resolve: pathResolve, basename: pathBasename } = require('path');
 
+const utils = require('./utils');
 const pkg = require('../package.json');
-const findNearestCargoToml = require('./find');
 const { libFile, createGdnlibFile } = require('./content');
 
 const log = console.log;
@@ -146,7 +146,7 @@ module.exports = {
     fs.writeFileSync(`${name}/src/lib.rs`, libFile);
 
     /**
-     * Create the gdnlib file for the Godot project this module is related to.
+     * Save the module name to the config file so that it can be destroyed later if needed.
      */
     const config = fs.readJsonSync('godot-rust-helper.json');
     config.modules.push(name);
@@ -206,6 +206,76 @@ module.exports = {
   },
 
   /**
+   * The `import` command is used to import a Rust module from outside the environment.
+   * 
+   * This command performs a basic validation of the module and then moves the module to the environment's directory
+   * 
+   * @param {string} pathToModule The path to the Rust module to import.
+   */
+  import(pathToModule) {
+    log(chalk.white('starting import'));
+    /**
+     * We want this command to only be usable from the root of the environment's directory.
+     * 
+     * If we look for the closest config file we could run into issues with other environments so we'll enforce this as it makes sense anyways.
+     */
+    if (!fs.pathExistsSync('godot-rust-helper.json')) {
+      console.log('The import command can only be used from the root of the environment.');
+      return;
+    }
+
+    /**
+     * We're in the environment root, now we check to see if the path is valid.
+     */
+    if (!fs.pathExistsSync(pathToModule)) {
+      console.log('The path to the Rust module to import does not exist.');
+      return;
+    }
+
+    /**
+     * Next, we perform a basic check to make sure that it is a Rust module (contains a cargo.toml file).
+     */
+    if (!fs.pathExistsSync(pathJoin(pathToModule, 'Cargo.toml'))) {
+      console.log('The Rust module provided does not contain a Cargo.toml file and cannot be imported.');
+      return;
+    }
+
+    /**
+     * Now that we know it exists and is semi-valid, we check the full validity of the module.
+     * 
+     * This checks to make sure that the Cargo.toml contains the basic necessary components of a Rust module.
+     */
+    const moduleToml = fs.readFileSync(pathJoin(pathToModule, 'Cargo.toml'), { encoding: 'utf-8' });
+    if (!moduleToml.includes('cdylib') || !moduleToml.includes('gdnative')) {
+      console.log('The Rust module is missing key aspects of a basic Rust module such as the gdnative dependency and cannot be imported.');
+      return;
+    }
+
+    /**
+     * Finally we copy the module into the environment root, create the gdnlib file for it if it does not exist, and add it to the 
+     * godot-rust-helper.json config so that it can be kept track of.
+     * 
+     * Note: The gdnlib process also exists in the `create` command so it should be made into a reusable function.
+     */
+    log(chalk.white('creating gdnlib file...'));
+
+    const moduleName = pathBasename(pathToModule);
+    fs.copySync(pathToModule, pathJoin(process.cwd(), moduleName));
+
+    const config = fs.readJsonSync('godot-rust-helper.json');
+    config.modules.push(pathBasename(pathToModule));
+
+    fs.ensureDirSync(`${config.godotProjectDir}/rust-modules/${moduleName}`);
+
+    const gdnlib = createGdnlibFile(moduleName, config.targets);
+    fs.writeFileSync(`${config.godotProjectDir}/rust-modules/${moduleName}/${moduleName}.gdnlib`, gdnlib);
+
+    fs.outputJsonSync('godot-rust-helper.json', config);
+
+    log(chalk.green('import complete'));
+  },
+
+  /**
    * Runs the build command and copies the target files into the Godot project directory.
    * 
    * @async
@@ -217,7 +287,7 @@ module.exports = {
     /**
      * First we have to find the root of the module, because it might not be where the command is being run from.
      */
-    const moduleDir = findNearestCargoToml(process.cwd());
+    const moduleDir = utils.findFile(process.cwd(), 'Cargo.toml');
 
     /**
      * Get the config so that we can check the targets later.
@@ -272,7 +342,7 @@ module.exports = {
     /**
      * First we have to find the root of the module, because it might not be where the command is being run from.
      */
-    const moduleDir = findNearestCargoToml(process.cwd());
+    const moduleDir = utils.findFile(process.cwd(), 'Cargo.toml');
 
     /**
      * Now that we have the module dir, we can watch the src dir.

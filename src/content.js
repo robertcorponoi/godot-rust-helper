@@ -66,11 +66,11 @@ function createGdnlibFile(name, targets) {
         gdnlibArr.splice(depInsertPoint, 0, `Windows.64=[  ]`);
         break;
       case 'linux':
-        gdnlibArr.splice(entryInsertPoint, 0, `X11.64="res://rust-modules/${name}/${name}.so"`);
+        gdnlibArr.splice(entryInsertPoint, 0, `X11.64="res://rust-modules/lib${name}/${name}.so"`);
         gdnlibArr.splice(depInsertPoint, 0, `X11.64=[  ]`);
         break;
       case 'osx':
-        gdnlibArr.splice(entryInsertPoint, 0, `OSX.64="res://rust-modules/${name}/${name}.dylib"`);
+        gdnlibArr.splice(entryInsertPoint, 0, `OSX.64="res://rust-modules/lib${name}/${name}.dylib"`);
         gdnlibArr.splice(depInsertPoint, 0, `OSX.64=[  ]`);
         break;
     }

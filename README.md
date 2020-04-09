@@ -136,6 +136,20 @@ From here you're done and if you're doing the HelloWorld example you'll see "Hel
 
 **Note:** If you update your Rust module you do not have to update the corresponding .gdnlib file in Godot, it will be updated automatically.
 
+## **Other Commands**
+
+The following are commands are situational but are not needed for the basic setup.
+
+### **import**
+
+Imports a rust module from outside of the environment. This command can only be used from an environment and is is typically used if you want to import a module from another environment into your current environment.
+
+**Usage:**
+
+```bash
+$ godot-rust-helper import <path_to_module_to_import>
+```
+
 ## **Tests**
 
 ```bash

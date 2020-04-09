@@ -1,3 +1,7 @@
+## 1.1.0 / 2020-04-08
+- [FEATURE] Added ability to import outside modules using the `import` command.
+- [DOCS] Added documentation for `import` command.
+
 ## 1.0.1 / 2020-04-08
 - [HOTFIX] Fix delimiter on mac/linux & add 'lib' prefix @harumaxy
 

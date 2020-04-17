@@ -4,7 +4,7 @@
 
 <h1 align="center">Godot Rust Helper</h1>
 
-<p align="center">A shell script that helps you create and update Rust modules for Godot.<p>
+<p align="center">A simple CLI tool to help you create and update Rust modules for your Godot projects.<p>
 
 <div align="center">
 
@@ -18,83 +18,77 @@
 
 </div>
 
-## **Why**
-
-Using Rust modules with Godot is super performant and fun but it can sometimes be intimidating or frustrating to set up and maintain. Godot rust helper aims to help you get rid of some of this frustration by managing your modules and updating their references in the Godot project. Note that this covers about 80% of use cases and if you have a different use case then I would be more than happy to add functionality to accomodate for it.
+**Note:** This is the documentation for the new 2.x version of godot-rust-helper. If you are looking for 1.x and below, you can find it [here](https://github.com/robertcorponoi/godot-rust-helper/tree/v1.1.0).
 
 ## **Install**
 
-This CLI tool can be installed globally like so:
+Since godot-rust-helper is a CLI tool that is meant to be used whenever you want, you should install it globally like so:
 
 ```bash
 $ npm install -g godot-rust-helper
 ```
 
-## **Step 1: Creating an Environment**
+## **Step 1: Creating the Project's Library**
 
-For each project you create in Godot, you have to set up a new "environment". The environment is a term used to describe a directory created by godot-rust-helper that has a config file and holds all of your Rust modules.
+For each game you create in Godot you will have to create a new library. The library itself is a cargo library and it holds all of the modules used in your game.
 
-To create a new environment, navigate to where you would like to reside and use the new command like so:
+To create the project's library, navigate to where you would like to store the modules (outside of your Godot project directory) and use the `new` command:
 
 ```bash
-$ godot-rust-helper new <path_to_environment_to_create> <path_to_godot_project> <targets>
+$ godot-rust-helper new <library_name> <path_to_godot_project> <targets>
 ```
 
-Let's go over the possible arguments that can be passed and some examples.
+Let's go over the arguments in detail with some examples.
 
-- **path_to_environment_to_create** The path to the environment of the environment to create.
+- **library_name** The name of the library that will contain your Rust modules. The name of the library is recommended to be the same or similar in name to your game. Also keep in mind that the library is created using `cargo new` so you should abide by the cargo project naming standards.
 - **path_to_godot_project** This is the path to the root directory of the Godot project that the modules will belong to.
 - **targets** Native modules in Godot can target multiple platforms and godot-rust-helper needs to know ahead of time what platforms you plan to target your modules for with the available options currently being: windows, linux, and osx. For example if you are targeting Windows and OSX, you need to have have cargo set to build a dll and a dylib file and you would pass windows,osx as the targets. By default if no targets are passed then just windows will be set.
 
 **examples:**
 
-Creating a default environment for Windows only builds:
+Creating a default library for Windows only builds:
 
 ```bash
-$ godot-rust-helper new breakout-modules ~/Documents/projects/breakout
+$ godot-rust-helper new breakout_modules ~/Documents/projects/breakout
 ```
 
-Creating an environment for Windows, Linux, and OSX builds:
+Creating an library for Windows, Linux, and OSX builds:
 
 ```bash
 $ godot-rust-helper new breakout-modules ~/Documents/projects/breakout windows,linux,osx
 ```
 
+**Note:** The `src/lib.rs` file is completely managed by godot-rust-helper and should not be modified. Any modifications to the file will result in the modules not functioning properly or they will be overwritten when a module is created/destroyed. Custom mods can be added to the file through `godot-rust-helper mod` as shown [here](#mod)(coming soon).
+
 ## **Step 2: Creating Modules**
 
-Now that you've created the environment, you can go into the newly created folder and see the config file. This config file contains the path to the Godot project directory and the targets passed from the `new` command. This config file should not be modified manually as godot-rust-helper depends on it heavily.
+Now that you've created the library, you can go into the newly created folder and see the config file. This config file contains the path to the Godot project directory and the targets passed from the `new` command. This config file should not be modified manually as godot-rust-helper depends on it heavily.
 
 From this directory, we can now begin to make modules with the create command like so:
 
 ```bash
-$ godot-rust-helper create <name>
+$ godot-rust-helper create <class_name>
 ```
 
-- **name** The name of the module to create. This should be the same name as you would use if you were going to use `cargo new <name> --lib`.
+- **name** The name passed to this command should be the class name of the module. Class names must start with capital letters. Examples include 'Player', 'Princess', 'Mob', 'HUD', etc.
 
-What this does is run `cargo new <name> --lib` and adds the necessary tags and dependencies to write Godot modules. This also the `src/lib.rs` file to the basic HelloWorld example. This script is meant to attach to a generic Node and prints "Hello, world" to the console when the project is run.
+What this does is create a `src/<name>.rs` file for the module and adds an entry for it in the `src/lib.rs` file. If you attach this script as it is to a Node and run the game then "hello, world" will print to the godot console.
 
-This also creates a directory in the "rust-modules" directory in your Godot project for the module which will contain the .gdnlib file and the build files.
+**Note:** This command has to be run from the library's directory.
 
-**Note:** This command has to be run from the environment directory.
-
-### **Removing Modules**
-
-You can also remove all traces of modules from the environment and the Godot project by using the `destroy` command. This is the recommended way to remove modules.
-
-**example:**
+**examples:**
 
 ```bash
-$ godot-rust-helper destroy <name>
+$ godot-rust-helper create Player
 ```
 
-where `name` is the name used when creating the module.
-
-**Note:** This command has to be run from the environment directory.
+```bash
+$ godot-rust-helper create HUD
+```
 
 ## **Step 3: Building Modules**
 
-After you have created your module (or you can do this with the default contents to try it out) you're ready to build your script using:
+After you have created your module (or you can do this with the default contents to try it out) you're ready to run a build using:
 
 ```bash
 $ godot-rust-helper build
@@ -102,37 +96,41 @@ $ godot-rust-helper build
 
 What this does is first run `cargo build` and then it moves the build files into the Godot project directory.
 
-**Note:** This command has to be run from the module directory.
+**Note:** This command has to be run from the library's directory.
 
 **Note:** The first time you run this it will take a while as it have to reach out and download the necessary dependencies, every build after that will be much quicker.
 
 The build command also supports the `--watch` option which will watch the src directory of your module for changes and re-build it automatically.
 
+**examples:**
+
+Running the build command:
+
+```bash
+$ godot-rust-helper build
+```
+
+Running the build command and watching for changes to any modules in the library.
+
 ```bash
 $ godot-rust-helper build --watch
 ```
 
-## **Final Steps**
+## **Step 4: Using the Module in Godot**
 
-There's one step that has to be done by hand and that's heading over to your Godot project, creating the node that your script expects, and adding the script to the node.
+The last step that has to be done to use your module in your Godot project is creating the script and attaching it to the node that needs to use it.
 
-As an example with the default HelloWorld script that attaches to a generic Node, it would go like so:
+After you have created a module and run a build, you can attach the script to a node like so:
 
-1. Add a Node to your scene (in your custom scripts you would add the type of node that your script expects).
-
-2. In the Node's inspector, go to the script dropdown and choose to add a new script.
-
-3. In the Attach Node Script modal set the following options:
+1. Choose the node to add the script to and in the inspector go to the script dropdown and choose to add a new script.
+2. In the Attach Node Script modal, set the following options:
   - **Language:** NativeScript
-  - **Class Name:** The name of the class in your Rust module's `src/lib.rs` file. In the HelloWorld example this is just HelloWorld.
-
-3. (Optionally change the file name) Press create.
-
+  - **Class Name:** The name you passed to `godot-rust-helper create` which is the class name of the Rust module you created.
+3. Change the name of the script to match the class name and save the script to the rust-modules folder
+4. Click on the newly created .gdns file (or after the steps above it should be active in the inspector already) and in the Library dropdown choose load and select the "library_name.gdnlib" file in the rust-modules folder. This library name is the same name passed to `godot-rust-helper new`.
 4. Click on the newly created Node.gdns (or whatever you named it above if you chose a custom name).
 
-5. In the Library dropdown, choose load and select the "module-name.gdnlib" file in the rust-modules folder whose name corresponds to your Rust module's name.
-
-From here you're done and if you're doing the HelloWorld example you'll see "Hello, world" printed to the console when you run the game.
+Now if you run your game you will see your script's functionality up and running!
 
 **Note:** If you update your Rust module you do not have to update the corresponding .gdnlib file in Godot, it will be updated automatically.
 
@@ -140,14 +138,49 @@ From here you're done and if you're doing the HelloWorld example you'll see "Hel
 
 The following are commands are situational but are not needed for the basic setup.
 
-### **import**
+### **destroy**
 
-Imports a rust module from outside of the environment. This command can only be used from an environment and is is typically used if you want to import a module from another environment into your current environment.
-
-**Usage:**
+Removes a Rust module from the library. You will still need to remove the script reference from your node in Godot as it will throw an error if you attempt to run the game since the script no longer exists.
 
 ```bash
-$ godot-rust-helper import <path_to_module_to_import>
+$ godot-rust-helper destroy <class_name>
+```
+
+- **class_name** The name of the class to destroy. This should be the same name that was used when it was created with `godot-rust-helper create`.
+
+**examples:**
+
+```bash
+$ godot-rust-helper destroy Player
+```
+
+```bash
+$ godot-rust-helper destroy HUD
+```
+
+### **mod**
+
+Coming soon!
+
+### **import**
+
+Imports a Rust module from another library into the current library.
+
+```bash
+$ godot-rust-helper import <path_to_library> <class_name>
+```
+
+- **path_to_library** The path to the library that contains the module to import.
+- **class_name** The class name of the module to import. This should be the same name that was passed to `godot-rust-helper create` when it was created.
+
+**examples:**
+
+```bash
+$ godot-rust-helper import ../kinematic_character Player
+```
+
+```bash
+$ godot-rust-helper import ../kinematic_character Princess
 ```
 
 ## **Tests**

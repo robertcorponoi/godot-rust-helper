@@ -1,3 +1,8 @@
+## 2.0.0 / 2020-04-16
+- [FEATURE] Major rework to project structures. Modules are now all part of one project instead of being spread out across multiple projects.
+- [DOCS] Updated documentation to be up to date with the rework.
+- [MISC] Updated tests for the rework.
+
 ## 1.1.0 / 2020-04-08
 - [FEATURE] Added ability to import outside modules using the `import` command.
 - [DOCS] Added documentation for `import` command.

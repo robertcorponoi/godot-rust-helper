@@ -13,37 +13,38 @@ program.option('--watch', 'Watch files in src folder and rebuild on changes.')
 /**
  * Adds the `new` command.
  * 
- * The `new` command is used to create an environment for your Rust modules. The environment is created as a directory in the specified destination.
+ * The `new` command is used to create the library that will contain your Rust modules.
  * 
- * Each Godot project should have a new environment created for it since each game will have its own modules.
+ * The name of the library that will contain your Rust modules. The name of the library is recommended to be the same or similar in name to your game. 
+ * Also keep in mind that the library is created using `cargo new` so you should abide by the cargo project naming standards.
  */
 program
   .command('new <destination> <godotProjectDir> [targets]')
-  .description('Creates a new environment for managing your Rust modules. Each Godot project should have a new environment created for it since each game will have its own modules.')
+  .description('Creates the library that will contain your Rust modules. Each Godot project should have its own library since each game will have its own modules.')
   .action(commands.new);
 
 /**
  * Add the `create` command.
  * 
- * The `create` command is used inside of an environment created with `new` and is used to initialize a new Rust module.
+ * The `create` command is used inside of a library created with `new` and is used to initialize a new Rust module for use in the game.
  * 
- * The name provided to this command will be used to create the name for the Rust package so name it accordingly.
+ * The name passed to this command should be the class name of the module. Class names must start with capital letters. Examples include 'Player', 'Princess', 'Mob', 'HUD', etc.
  */
 program
   .command('create <name>')
-  .description('Creates a new Rust module and creates the gdnlib file in the Godot project directory.')
+  .description('Initializes a new Rust module for use in the game.')
   .action(commands.create);
 
 /**
  * Add the `destroy` command.
  * 
- * The `destroy` command is used inside of an environment created with `new` and is used to remove a Rust module created with `create`.
+ * The `destroy` command is used inside of a library created with `new` and is used to remove a module created with `create`.
  * 
- * This is the recommended way to remove Rust modules as it gets rid of any traces from the environment and the Godot project.
+ * This is the recommended way to remove Rust modules as it cleanly removes it from the library and the Godot project.
  */
 program
   .command('destroy <name>')
-  .description('Removes all traces of a created Rust module.')
+  .description('Removes a created Rust module.')
   .action(commands.destroy);
 
 /**
@@ -52,8 +53,8 @@ program
  * The `import` command is used to import a Rust module from outside the environment.
  */
 program
-  .command('import <path>')
-  .description('Imports an existing Rust module into this environment.')
+  .command('import <path> <name>')
+  .description('Imports an Rust module from another library into this library.')
   .action(commands.import);
 
 /**

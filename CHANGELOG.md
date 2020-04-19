@@ -1,3 +1,8 @@
+## 2.1.0 / 2020-04-19
+- [FEATURE] Made targets an option instead of an argument.
+- [FEATURE] Added extensions option to add the `godot_rust_helper_extensions` dependency.
+- [MISC] Expanded tests and documentation.
+
 ## 2.0.0 / 2020-04-16
 - [FEATURE] Major rework to project structures. Modules are now all part of one project instead of being spread out across multiple projects.
 - [DOCS] Updated documentation to be up to date with the rework.

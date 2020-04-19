@@ -21,7 +21,6 @@ godot_gdnative_terminate!();`
   /**
    * Creates the contents for the src/lib.rs file depending on what modules are present.
    * 
-   * @param {string} file The contents of the existing file.
    * @param {Array<string>} modules The modules that have been created.
    * 
    * @returns {string} Returns a lib.rs file with the modules specified.
@@ -104,7 +103,7 @@ impl ${name} {
     ];
 
     const entryInsertPoint = 2;
-    const depInsertPoint = 6;
+    let depInsertPoint = 6;
 
     targets.map(target => {
       switch (target) {
@@ -121,6 +120,8 @@ impl ${name} {
           gdnlibArr.splice(depInsertPoint, 0, `OSX.64=[  ]`);
           break;
       }
+
+      depInsertPoint++;
     });
 
     return gdnlibArr.join('\n');

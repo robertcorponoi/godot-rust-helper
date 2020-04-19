@@ -35,14 +35,19 @@ For each game you create in Godot you will have to create a new library. The lib
 To create the project's library, navigate to where you would like to store the modules (outside of your Godot project directory) and use the `new` command:
 
 ```bash
-$ godot-rust-helper new <library_name> <path_to_godot_project> <targets>
+$ godot-rust-helper new <library_name> <path_to_godot_project> [options]
 ```
 
-Let's go over the arguments in detail with some examples.
+Let's go over the arguments and options in detail with some examples.
+
+**Arguments:**
 
 - **library_name** The name of the library that will contain your Rust modules. The name of the library is recommended to be the same or similar in name to your game. Also keep in mind that the library is created using `cargo new` so you should abide by the cargo project naming standards.
 - **path_to_godot_project** This is the path to the root directory of the Godot project that the modules will belong to.
-- **targets** Native modules in Godot can target multiple platforms and godot-rust-helper needs to know ahead of time what platforms you plan to target your modules for with the available options currently being: windows, linux, and osx. For example if you are targeting Windows and OSX, you need to have have cargo set to build a dll and a dylib file and you would pass windows,osx as the targets. By default if no targets are passed then just windows will be set.
+
+**Options:**
+- `--targets` Native modules in Godot can target multiple platforms and godot-rust-helper needs to know ahead of time what platforms you plan to target your modules for with the available options currently being: windows, linux, and osx. For example if you are targeting Windows and OSX, you need to have have cargo set to build a dll and a dylib file and you would pass `--targets=windows,osx` as the targets. By default if no targets are passed then just `--targets=windows` will be set.
+-`--extensions` If this flag is passed the [extensions](https://github.com/robertcorponoi/godot-rust-helper-extensions) dependency will be added to the library. The extensions are a new and growing feature so stay tuned to see what gets added to them and check out the documention in the extensions repository to see if and how you can use it in your modules.
 
 **examples:**
 

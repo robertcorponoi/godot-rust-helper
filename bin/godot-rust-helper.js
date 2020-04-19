@@ -9,6 +9,8 @@ const commands = require('../src/commands');
  */
 program.version(pkg.version);
 program.option('--watch', 'Watch files in src folder and rebuild on changes.')
+program.option('-t, --targets <targets>', 'The target platforms you plan on building for.', 'windows');
+program.option('-e, --extensions', 'Indicates whether an optional extensions module will be added for ease of use functions such as getting typed nodes.', false);
 
 /**
  * Adds the `new` command.
@@ -21,7 +23,7 @@ program.option('--watch', 'Watch files in src folder and rebuild on changes.')
 program
   .command('new <destination> <godotProjectDir> [targets]')
   .description('Creates the library that will contain your Rust modules. Each Godot project should have its own library since each game will have its own modules.')
-  .action(commands.new);
+  .action((destination, godotProjectDir) => commands.new(destination, godotProjectDir, program.targets, program.extensions));
 
 /**
  * Add the `create` command.

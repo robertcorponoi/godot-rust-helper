@@ -4,7 +4,16 @@ const chai = require('chai');
 const fs = require('fs-extra');
 const shelljs = require('shelljs');
 
-afterEach(() => {
+afterEach(function () {
+  this.timeout(500000);
+
+  fs.removeSync('test/shoot_the_creeps');
+  fs.removeSync('test/godot-test-project/rust-modules');
+});
+
+after(function () {
+  this.timeout(500000);
+
   fs.removeSync('test/shoot_the_creeps');
   fs.removeSync('test/godot-test-project/rust-modules');
 });
@@ -14,45 +23,126 @@ describe('Creating a new environment', () => {
     shelljs.exec(`node bin/godot-rust-helper.js new test/test-environment src`);
 
     chai.expect(fs.pathExistsSync('test/test-environment')).to.be.false;
-  });
+  }).timeout(300000);
+
+  it('should create a new environment with the default Cargo.toml file', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
+
+    const toml = fs.readFileSync('test/shoot_the_creeps/Cargo.toml', { encoding: 'utf-8' }).split('\n');
+
+    chai.expect(toml[8]).to.equal(`[lib]`);
+    chai.expect(toml[9]).to.equal(`crate-type = ["cdylib"]`);
+    chai.expect(toml[11]).to.equal(`[dependencies]`);
+    chai.expect(toml[12]).to.equal(`gdnative = { git = "https://github.com/GodotNativeTools/godot-rust" }`);
+  }).timeout(300000);
+
+  it('should create a new environment with extensions added to the Cargo.toml file', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project --extensions`);
+
+    const toml = fs.readFileSync('test/shoot_the_creeps/Cargo.toml', { encoding: 'utf-8' }).split('\n');
+
+    chai.expect(toml[8]).to.equal(`[lib]`);
+    chai.expect(toml[9]).to.equal(`crate-type = ["cdylib"]`);
+    chai.expect(toml[11]).to.equal(`[dependencies]`);
+    chai.expect(toml[12]).to.equal(`gdnative = { git = "https://github.com/GodotNativeTools/godot-rust" }`);
+    chai.expect(toml[13]).to.equal(`godot_rust_helper_extensions = { git = "https://github.com/robertcorponoi/godot-rust-helper-extensions" }`);
+  }).timeout(300000);
 
   it('should create a new environment with a config file containing the default targets', () => {
     shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
 
     const config = fs.readJsonSync('test/shoot_the_creeps/godot-rust-helper.json');
+    const gdnlib = fs.readFileSync('test/godot-test-project/rust-modules/shoot_the_creeps.gdnlib', { encoding: 'utf-8' }).split('\n');
 
-    const expected = {
+    const expectedConfig = {
       name: 'shoot_the_creeps',
       godotProjectDir: 'C:\\Users\\Bob\\Documents\\Projects\\godot-rust-helper\\test\\godot-test-project',
       targets: ['windows'],
-      modules: []
+      modules: [],
+      extensions: false
     };
 
-    chai.expect(config).to.deep.equal(expected);
-  });
+    const expectedGdnlib = [
+      '[entry]',
+      '',
+      'Windows.64="res://rust-modules/shoot_the_creeps.dll\"',
+      '',
+      '[dependencies]',
+      '',
+      'Windows.64=[  ]',
+      '',
+      '[general]',
+      '',
+      'singleton=false',
+      'load_once=true',
+      'symbol_prefix="godot_"',
+      'reloadable=true',
+      ''
+    ];
+
+    chai.expect(config).to.deep.equal(expectedConfig);
+    chai.expect(gdnlib).to.deep.equal(expectedGdnlib)
+  }).timeout(300000);
+
+  it('should create a new environment with a config file containing the linux, and osx as targets', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project --targets=linux,osx`);
+
+    const config = fs.readJsonSync('test/shoot_the_creeps/godot-rust-helper.json');
+    const gdnlib = fs.readFileSync('test/godot-test-project/rust-modules/shoot_the_creeps.gdnlib', { encoding: 'utf-8' }).split('\n');
+
+    const expectedConfig = {
+      name: 'shoot_the_creeps',
+      godotProjectDir: 'C:\\Users\\Bob\\Documents\\Projects\\godot-rust-helper\\test\\godot-test-project',
+      targets: ['linux', 'osx'],
+      modules: [],
+      extensions: false
+    };
+
+    const expectedGdnlib = [
+      '[entry]',
+      '',
+      'OSX.64="res://rust-modules/libshoot_the_creeps.dylib\"',
+      'X11.64="res://rust-modules/libshoot_the_creeps.so\"',
+      '',
+      '[dependencies]',
+      '',
+      'OSX.64=[  ]',
+      'X11.64=[  ]',
+      '',
+      '[general]',
+      '',
+      'singleton=false',
+      'load_once=true',
+      'symbol_prefix="godot_"',
+      'reloadable=true',
+      ''
+    ];
+
+    chai.expect(config).to.deep.equal(expectedConfig);
+    chai.expect(gdnlib).to.deep.equal(expectedGdnlib);
+  }).timeout(300000);
 
   it('should create a rust-modules folder in the godot project dir and create a gdnlib file for the library', () => {
     shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
 
     chai.expect(fs.pathExistsSync('test/godot-test-project/rust-modules/shoot_the_creeps.gdnlib')).to.be.true;
-  }).timeout(5000);
+  }).timeout(300000);
 });
 
 describe('Creating modules', function () {
-  beforeEach(function () {
-    this.timeout(30000);
-    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
-  });
-
   it('should create a module and add an entry for it in the config file', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
+
     shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create Hello)`);
 
     const config = fs.readJsonSync('test/shoot_the_creeps/godot-rust-helper.json');
 
     chai.expect(config.modules).to.deep.equal(['Hello']);
-  }).timeout(5000);
+  }).timeout(300000);
 
   it('should create a module and it to the lib file', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
+
     shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create Hello)`);
 
     const libFile = fs.readFileSync('test/shoot_the_creeps/src/lib.rs', { encoding: 'utf-8' }).split('\n');
@@ -72,9 +162,39 @@ describe('Creating modules', function () {
     ];
 
     chai.expect(libFile).to.deep.equal(expected);
-  }).timeout(5000);
+  }).timeout(300000);
+
+  it('should create a module and create a module file for it', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
+
+    shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create Hello)`);
+
+    const modFile = fs.readFileSync('test/shoot_the_creeps/src/hello.rs', { encoding: 'utf-8' }).split('\n');
+    const expectedModFile = [
+      '#[derive(gdnative::NativeClass)]',
+      '#[inherit(gdnative::Node)]',
+      'pub struct Hello;',
+      '',
+      '#[gdnative::methods]',
+      'impl Hello {',
+      '  fn _init(_owner: gdnative::Node) -> Self {',
+      '    Hello',
+      '  }',
+      '',
+      '  #[export]',
+      '  fn _ready(&self, _owner: gdnative::Node) {',
+      '    godot_print!("hello, world.")',
+      '  }',
+      '}',
+      ''
+    ];
+
+    chai.expect(modFile).to.deep.equal(expectedModFile);
+  }).timeout(300000);
 
   it('should create multiple modules', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
+
     shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create Hello)`);
     shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create World)`);
 
@@ -88,9 +208,11 @@ describe('Creating modules', function () {
     chai.expect(gdnlibFileExists).to.be.true;
     chai.expect(helloLibFileExists).to.be.true;
     chai.expect(worldLibFileExists).to.be.true;
-  }).timeout(50000);
+  }).timeout(300000);
 
   it('should create multiple modules and add them to the lib file', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
+
     shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create Hello)`);
     shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create World)`);
 
@@ -113,7 +235,7 @@ describe('Creating modules', function () {
     ];
 
     chai.expect(libFile).to.deep.equal(expected);
-  }).timeout(5000);
+  }).timeout(300000);
 });
 
 describe('Removing modules', () => {
@@ -146,7 +268,7 @@ describe('Removing modules', () => {
     chai.expect(config.modules).to.deep.equal([]);
     chai.expect(moduleExists).to.be.false;
     chai.expect(libFile).to.deep.equal(expectedLibFile);
-  }).timeout(5000);
+  }).timeout(300000);
 
   it('should create two modules and remove one', () => {
     shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create Hello)`);
@@ -178,7 +300,7 @@ describe('Removing modules', () => {
     chai.expect(helloModuleExists).to.be.true;
     chai.expect(byeModuleExists).to.be.false;
     chai.expect(libFile).to.deep.equal(expectedLibFile);
-  }).timeout(5000);
+  }).timeout(300000);
 });
 
 describe('Importing modules', function () {
@@ -228,7 +350,7 @@ describe('Importing modules', function () {
 });
 
 describe('Building modules', function () {
-  this.timeout(300000);
+  this.timeout(5000000);
 
   beforeEach(function () {
     shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);

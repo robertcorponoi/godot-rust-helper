@@ -32,8 +32,9 @@ module.exports = {
    * @param {string} name The name of the library that will contain your Rust modules. The name of the library is recommended to be the same name as your game, snake_case, maybe with `_modules` at the end. Also keep in mind that the library is created using `cargo new`
    * @param {string} godotProjectDir The directory that contains the project.godot file of the game that the modules are for.
    * @param {string} [targets] The build targets that should be set. As of writing this, the available targets are windows, linux, and osx with the default being just windows.
+   * @param {boolean} [extensions] Indicates whether an optional extensions module will be added for ease of use functions such as getting typed nodes.
    */
-  async new(name, godotProjectDir, targets = 'windows') {
+  async new(name, godotProjectDir, targets, extensions) {
     log(chalk.white('creating library'));
     // Check to see if the library already exists in the current directory.
     if (fs.pathExistsSync(name)) {
@@ -67,6 +68,7 @@ module.exports = {
     }
     const depInsertPoint = moduleToml.indexOf('[dependencies]');
     moduleToml.splice(depInsertPoint + 1, 0, 'gdnative = { git = "https://github.com/GodotNativeTools/godot-rust" }');
+    if (extensions) moduleToml.splice(depInsertPoint + 2, 0, 'godot_rust_helper_extensions = { git = "https://github.com/robertcorponoi/godot-rust-helper-extensions" }');
     fs.writeFileSync(`${name}/Cargo.toml`, moduleToml.join('\n'));
 
     /**
@@ -89,7 +91,8 @@ module.exports = {
       name: pathBasename(name),
       godotProjectDir: pathResolve(godotProjectDir),
       targets,
-      modules: []
+      modules: [],
+      extensions
     };
 
     // Save the config file as we're done working with it for now.
@@ -102,7 +105,7 @@ module.exports = {
     fs.mkdirpSync(pathJoin(godotProjectDir, 'rust-modules'));
 
     // Create the gdnlib file for the module and save it to the Godot project directory.
-    const gdnlib = content.createGdnlibFile(name, config.targets);
+    const gdnlib = content.createGdnlibFile(pathBasename(name), config.targets);
     fs.writeFileSync(`${config.godotProjectDir}/rust-modules/${pathBasename(name)}.gdnlib`, gdnlib);
     log(chalk.green('library created successfully'));
   },
@@ -138,8 +141,10 @@ module.exports = {
     fs.outputJsonSync('godot-rust-helper.json', config);
 
     // Create a new src/lib.rs with the new module added to it.
-    const libFileNew = content.createLibFile(config.modules);
+    const libFileNew = content.createLibFile(config.modules, config.extensions);
     fs.writeFileSync(`src/lib.rs`, libFileNew);
+
+    // Create the extensions file if requested.
 
     // Create a sample lib file for the module that prints "Hello, World!" when the game is run.
     fs.writeFileSync(`src/${nameNormalized}.rs`, content.createModuleFile(name));

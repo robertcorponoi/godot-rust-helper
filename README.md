@@ -47,7 +47,7 @@ Let's go over the arguments and options in detail with some examples.
 
 **Options:**
 - `--targets` Native modules in Godot can target multiple platforms and godot-rust-helper needs to know ahead of time what platforms you plan to target your modules for with the available options currently being: windows, linux, and osx. For example if you are targeting Windows and OSX, you need to have have cargo set to build a dll and a dylib file and you would pass `--targets=windows,osx` as the targets. By default if no targets are passed then just `--targets=windows` will be set.
--`--extensions` If this flag is passed the [extensions](https://github.com/robertcorponoi/godot-rust-helper-extensions) dependency will be added to the library. The extensions are a new and growing feature so stay tuned to see what gets added to them and check out the documention in the extensions repository to see if and how you can use it in your modules.
+- `--extensions` If this flag is passed the [extensions](https://github.com/robertcorponoi/godot-rust-helper-extensions) dependency will be added to the library. The extensions are a new and growing feature so stay tuned to see what gets added to them and check out the documention in the extensions repository to see if and how you can use it in your modules.
 
 **examples:**
 
@@ -63,7 +63,7 @@ Creating an library for Windows, Linux, and OSX builds:
 $ godot-rust-helper new breakout-modules ~/Documents/projects/breakout windows,linux,osx
 ```
 
-**Note:** The `src/lib.rs` file is completely managed by godot-rust-helper and should not be modified. Any modifications to the file will result in the modules not functioning properly or they will be overwritten when a module is created/destroyed. Custom mods can be added to the file through `godot-rust-helper mod` as shown [here](#mod)(coming soon).
+**Note:** The `src/lib.rs` file is completely managed by godot-rust-helper and should not be modified. Any modifications to the file will result in the modules not functioning properly or they will be overwritten when a module is created/destroyed. Custom mods can be added to the file through `godot-rust-helper mod` as shown [here](#mod) (coming soon).
 
 ## **Step 2: Creating Modules**
 

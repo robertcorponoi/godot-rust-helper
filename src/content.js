@@ -1,5 +1,7 @@
 'use strict'
 
+const utils = require('./utils');
+
 module.exports = {
   /**
    * Returns the initial contents of the src/lib.rs file.
@@ -30,10 +32,10 @@ godot_gdnative_terminate!();`
     let classes = '';
 
     modules.map(mod => {
-      let modlc = mod.toLowerCase();
+      const modNormalized = utils.formatModName(mod);
 
-      mods += `\nmod ${modlc};`;
-      classes += `\thandle.add_class::<${modlc}::${mod}>();`;
+      mods += `\nmod ${modNormalized};`;
+      classes += `\thandle.add_class::<${modNormalized}::${mod}>();`;
 
       if (modules.indexOf(mod) != modules.length - 1) classes += '\n';
     });

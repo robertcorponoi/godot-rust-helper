@@ -28,5 +28,17 @@ module.exports = {
     }
 
     return dirToCheck;
+  },
+
+  /**
+   * Splits a module name on capitals, joins it back together with an underscore, then converts it to lowercase.
+   * 
+   * @param {string} modName The module name to format.
+   * 
+   * @returns {string} Returns the formatted module name.
+   */
+  formatModName(modName) {
+    const modNameSplitOnCapitals = modName.split(/(?=[A-Z])/);
+    return modNameSplitOnCapitals.join('_').toLowerCase();
   }
 }

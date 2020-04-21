@@ -128,8 +128,10 @@ module.exports = {
       return;
     }
 
+    // Split the name on capital letters and make it lowercase to use in some places.
+    const nameNormalized = utils.formatModName(name);
+
     // Check to see if a module with the same name was already created.
-    const nameNormalized = name.toLowerCase();
     const config = fs.readJsonSync('godot-rust-helper.json');
     if (config.modules.includes(name)) {
       log(chalk.red('A module with the same name already exists.'));

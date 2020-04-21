@@ -1,3 +1,7 @@
+## 2.2.0 / 2020-04-21
+- [FEATURE] Modules with multiple uppercase letters (ex. MainScene) will now have their classes created as MainScene but will be registered as main_scene.
+- [MISC] Expended tests for new feature.
+
 ## 2.1.0 / 2020-04-19
 - [FEATURE] Made targets an option instead of an argument.
 - [FEATURE] Added extensions option to add the `godot_rust_helper_extensions` dependency.

@@ -192,6 +192,34 @@ describe('Creating modules', function () {
     chai.expect(modFile).to.deep.equal(expectedModFile);
   }).timeout(300000);
 
+  it('should create a module with multiple capital letters in the name', () => {
+    shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
+
+    shelljs.exec(`(cd test/shoot_the_creeps && node ../../bin/godot-rust-helper.js create MainScene)`);
+
+    const libFile = fs.readFileSync('test/shoot_the_creeps/src/lib.rs', { encoding: 'utf-8' }).split('\n');
+    const config = fs.readJSONSync('test/shoot_the_creeps/godot-rust-helper.json');
+
+    const expectedLibFile = [
+      '#[macro_use]',
+      'extern crate gdnative;',
+      '',
+      'mod main_scene;',
+      '',
+      'fn init(handle: gdnative::init::InitHandle) {',
+      '  \thandle.add_class::<main_scene::MainScene>();',
+      '}',
+      '',
+      'godot_gdnative_init!();',
+      'godot_nativescript_init!(init);',
+      'godot_gdnative_terminate!();'
+    ];
+
+    chai.expect(libFile).to.deep.equal(expectedLibFile);
+    chai.expect(config.modules).to.deep.equal(['MainScene']);
+    chai.expect(fs.pathExistsSync('test/shoot_the_creeps/src/main_scene.rs')).to.be.true;
+  }).timeout(300000);
+
   it('should create multiple modules', () => {
     shelljs.exec(`node bin/godot-rust-helper.js new test/shoot_the_creeps test/godot-test-project`);
 

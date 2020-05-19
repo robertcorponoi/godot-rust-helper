@@ -5,6 +5,8 @@
 <h1 align="center">Godot Rust Helper</h1>
 
 <p align="center">A simple CLI tool to help you create and update Rust modules for your Godot projects.<p>
+  
+  **Note:** This is not maintained anymore and as been replaced by [godot_rust_helper](https://github.com/robertcorponoi/godot_rust_helper)
 
 <div align="center">
 

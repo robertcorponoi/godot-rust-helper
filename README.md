@@ -5,10 +5,10 @@
 <h1 align="center">Godot Rust Helper</h1>
 
 <p align="center">A simple CLI tool to help you create and update Rust modules for your Godot projects.<p>
-  
-  **Note:** This is not maintained anymore and as been replaced by [godot_rust_helper](https://github.com/robertcorponoi/godot_rust_helper)
 
 <div align="center">
+  
+ **Note:** This is not maintained anymore and has been replaced by [godot_rust_helper](https://github.com/robertcorponoi/godot_rust_helper)
 
   [![NPM version](https://img.shields.io/npm/v/godot-rust-helper.svg?style=flat)](https://www.npmjs.com/package/godot-rust-helper)
   [![Known Vulnerabilities](https://snyk.io/test/github/robertcorponoi/godot-rust-helper/badge.svg)](https://snyk.io/test/github/robertcorponoi/godot-rust-helper)

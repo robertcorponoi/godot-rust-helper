@@ -1,3 +1,7 @@
+## **Archived**
+
+This package has been deprecated and replaced by [Godot Rust CLI](https://github.com/robertcorponoi/godot-rust-cli). This repository is no longer maintained.
+
 <p align="center">
   <img width="250" height="250" src="https://raw.githubusercontent.com/robertcorponoi/graphics/master/godot-rust-helper/godot-rust-helper-logo.png">
 </p>
